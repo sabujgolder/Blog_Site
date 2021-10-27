@@ -74,3 +74,25 @@ def pass_change(request):
             form.save()
             changed = True
     return render(request, 'App_Login/pass_change.html', context={'form':form, 'changed':changed})
+
+@login_required
+def profile_pic(request):
+    form = UserProfilePicUpload()
+    if request.method == "POST":
+        form=UserProfilePicUpload(request.POST,request.FILES)
+        if form.is_valid():
+            user_obj=form.save(commit=False)
+            user_obj.user = request.user
+            user_obj.save()
+            return HttpResponseRedirect(reverse('user:profile'))
+    return render(request,'App_Login/pic_change.html',{'form':form})
+
+@login_required
+def change_pro_pic(request):
+    form = UserProfilePicUpload(instance=request.user.user_profile)
+    if request.method == 'POST':
+        form = UserProfilePicUpload(request.POST, request.FILES, instance=request.user.user_profile)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('user:profile'))
+    return render(request, 'App_Login/pic_change.html', context={'form':form})
