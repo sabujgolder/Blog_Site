@@ -6,6 +6,7 @@ from django.urls import reverse,reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 import uuid
+from .forms import *
 def home(request):
     return render(request,'App_Blog/index.html')
 
@@ -31,4 +32,44 @@ def blog_details(request,pk):
 
     blog_name = blog.objects.get(id=pk)
 
-    return render(request,'App_Blog/blog_details.html',{'blog':blog_name})
+    already_liked = like.objects.filter(author=request.user,blog=blog_name)
+    blog_likes = like.objects.filter(blog=blog_name)
+    total_likes =  blog_likes.count()
+
+    if already_liked:
+        like_signal = True
+
+    else:
+        like_signal = False
+
+    form = CommentForm()
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.blog = blog_name
+            comment.save()
+            return HttpResponseRedirect(reverse('blog:detail', kwargs={'pk':pk}))
+    return render(request,'App_Blog/blog_details.html',{'blog':blog_name,'form':form,'likes':total_likes,'liked':like_signal})
+
+def likes(request,pk):
+
+    blog_name = blog.objects.get(id=pk)
+
+    already_liked = like.objects.filter(blog=blog_name,author = request.user)
+
+    if not already_liked:
+        liked_post = like(author = request.user,blog=blog_name)
+        liked_post.save()
+    return HttpResponseRedirect(reverse('blog:detail', kwargs={'pk':pk}))
+
+
+def unlike(request,pk):
+
+    blog = blog.objects.get(id=pk)
+    author = request.user
+    already_liked = like.objects.filter(blog=blog,author = author)
+    already_liked.delete()
+    return HttpResponseRedirect(reverse('blog:detail', kwargs={'pk':pk}))

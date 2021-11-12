@@ -14,20 +14,16 @@ class blog(models.Model):
         return self.blog_title
 
 class comment(models.Model):
-    author = models.ForeignKey(User,on_delete=models.CASCADE,related_name='blog_author')
-    blog = models.ForeignKey(blog,on_delete=models.CASCADE,related_name='user_comment')
+    author = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user_comment')
+    blog = models.ForeignKey(blog,on_delete=models.CASCADE,related_name='blog_comment')
     content = models.TextField(null=True,blank=True)
     comment_date = models.DateTimeField(auto_now_add=True,null=True)
     class Meta:
         ordering = ('-comment_date',)
 
     def __str__(self):
-        return self.comment
+        return self.content
 
 class like(models.Model):
     author = models.ForeignKey(User,on_delete=models.CASCADE,related_name='liked_blog')
     blog = models.ForeignKey(blog,on_delete=models.CASCADE,related_name='liked_user')
-
-
-    def __str__(self):
-        return self.user + " likes " + self.blog
