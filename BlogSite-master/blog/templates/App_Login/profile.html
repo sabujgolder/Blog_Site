@@ -1,38 +1,85 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 {% block title %} Profile {% endblock %}
 {% block body %}
-<h2>Your Profile</h2>
-<br>
-{% if user.user_profile %}
-  <!-- <img src='/media/{{user.user_profile.profile_pic}}' class="rounded-circle" width="100px"> -->
-  <div class="card" style="width:400px">
-    <img class="card-img-bottom" src='/media/{{user.user_profile.profile_pic}}' alt="Card image" style="width:100%">
-   <div class="card-body">
-     <h4 class="card-title">{{ user.username }}</h4>
-     <h6 class="card-title">Email : {{ user.email }}</h6>
-     <p class="card-text">{{user.first_name }} {{ user.last_name }}</p>
-     <a href="{% url 'user:change_pro_pic' %}" class="btn btn-primary">Change Pic</a>
-   </div>
 
+
+<div class="row">
+  <div class="col-sm-6">
+    <h2>Your Profile</h2>
+    <br>
+    {% if user.user_profile %}
+      <!-- <img src='/media/{{user.user_profile.profile_pic}}' class="rounded-circle" width="100px"> -->
+      <div class="card" style="width:400px">
+        <img class="card-img-bottom" src='/media/{{user.user_profile.profile_pic}}' alt="Card image" style="width:100%">
+       <div class="card-body">
+         <h4 class="card-title">{{ user.username }}</h4>
+         <h6 class="card-title">Email : {{ user.email }}</h6>
+         <p class="card-text">{{user.first_name }} {{ user.last_name }}</p>
+         <a href="{% url 'user:change_pro_pic' %}" class="btn btn-primary">Change Pic</a>
+       </div>
+
+      </div>
+
+      <br>
+
+    {% else %}
+      <img src='/media/profile_pics/avatar-male.jpg' class="rounded-circle" width="100px">
+
+      <div class="card" style="width:400px">
+        <img class="card-img-bottom" src='/media/profile_pics/avatar-male.jpg' alt="Card image" style="width:100%">
+       <div class="card-body">
+         <h4 class="card-title">{{ user.username }}</h4>
+         <h6 class="card-title">Email : {{ user.email }}</h6>
+         <p class="card-text">{{user.first_name }} {{ user.last_name }}</p>
+         <a href="{% url 'user:profile_pic' %}" class="btn btn-primary">Change Pic</a>
+       </div>
+
+      </div>
+
+    {% endif %}
+
+      <a href="{% url 'user:update_profile' %}" class="btn btn-warning btn-sm">Change Profile Info</a>
+      <br>
+      <br>
+      <hr>
   </div>
 
-  <br>
+  <div class="col-sm-6">
+    <h2>Your Blogs</h2>
+    <br>
 
-{% else %}
-  <img src='/media/profile_pics/avatar-male.jpg' class="rounded-circle" width="100px">
+    {% for x in owner %}
 
-  <div class="card" style="width:400px">
-    <img class="card-img-bottom" src='/media/profile_pics/avatar-male.jpg' alt="Card image" style="width:100%">
-   <div class="card-body">
-     <h4 class="card-title">{{ user.username }}</h4>
-     <h6 class="card-title">Email : {{ user.email }}</h6>
-     <p class="card-text">{{user.first_name }} {{ user.last_name }}</p>
-     <a href="{% url 'user:profile_pic' %}" class="btn btn-primary">Change Pic</a>
-   </div>
+      {% if request.user == x.author %}
 
+          <div class="card" style="width:400px">
+            <img class="card-img-bottom" src='/media/{{x.blog_image}}' alt="Card image" style="width:100%">
+           <div class="card-body">
+             <h3 class="card-title">{{ x.blog_title }}</h3>
+             <h6 class="card-text">{{ x.blog_content|card_filter|linebreaks }}</h6>
+             <p class="card-text">Author : {{x.author }} </p>
+             <p class="card-text">Published : {{x.publish_date }} </p><br>
+             <a href="{% url 'blog:updateblog' x.id %}" class="btn btn-warning btn-sm"> Update </a>
+           </div>
+           </div>
+       {% endif %}
+       <br>
+    {% endfor %}
+
+    <!-- {% for x in owner %}
+       {% if request.user == x.author %}
+        {{x.author}}
+      {% endif %}
+    {% endfor %} -->
+    <br>
+    <!-- {{request.user.blog}} -->
   </div>
+</div>
 
-{% endif %}
 
-  <a href="{% url 'user:update_profile' %}" class="btn btn-warning btn-sm">Change Profile Info</a>
+
+
+
+
 {% endblock %}

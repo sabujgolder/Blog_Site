@@ -7,8 +7,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 import uuid
 from .forms import *
+
 def home(request):
-    return render(request,'App_Blog/index.html')
+    return render(request,'App_Blog/bloglist.html')
 
 class CreateBlog(LoginRequiredMixin,CreateView):
     model = blog
@@ -28,6 +29,7 @@ class BlogList(ListView):
     model = blog
     template_name = 'App_Blog/blog_list.html'
 
+@login_required
 def blog_details(request,pk):
 
     blog_name = blog.objects.get(id=pk)
@@ -54,6 +56,7 @@ def blog_details(request,pk):
             return HttpResponseRedirect(reverse('blog:detail', kwargs={'pk':pk}))
     return render(request,'App_Blog/blog_details.html',{'blog':blog_name,'form':form,'likes':total_likes,'liked':like_signal})
 
+@login_required
 def likes(request,pk):
 
     blog_name = blog.objects.get(id=pk)
@@ -65,11 +68,26 @@ def likes(request,pk):
         liked_post.save()
     return HttpResponseRedirect(reverse('blog:detail', kwargs={'pk':pk}))
 
-
+@login_required
 def unlike(request,pk):
 
-    blog = blog.objects.get(id=pk)
+    blog_name = blog.objects.get(id=pk)
     author = request.user
-    already_liked = like.objects.filter(blog=blog,author = author)
+    already_liked = like.objects.filter(blog=blog_name,author = author)
     already_liked.delete()
     return HttpResponseRedirect(reverse('blog:detail', kwargs={'pk':pk}))
+
+@login_required
+def update_blog(request,pk):
+
+    content = blog.objects.get(id = pk)
+
+    updateform = BlogUpdate(instance=content)
+
+    if request.method == 'POST':
+        form = BlogUpdate(request.POST,instance=content)
+
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('blog:updateblog',kwargs={'pk':pk}))
+    return render(request,'App_Blog/edit_blog.html',{'updateform':updateform})

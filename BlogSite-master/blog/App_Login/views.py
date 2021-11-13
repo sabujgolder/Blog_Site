@@ -4,8 +4,9 @@ from django.http import HttpResponse,HttpResponseRedirect
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordChangeForm
 from django.contrib.auth import login,logout,authenticate
 from django.contrib.auth.decorators import login_required
-
+from App_Blog.models import *
 from .forms import *
+from django.contrib.auth.models import User
 
 def register(request):
     form = SignUpForm()
@@ -35,7 +36,7 @@ def login_user(request):
             if user is not None:
                 login(request,user)
                 # return redirect('')
-                return HttpResponseRedirect(reverse('blog:home'))
+                return HttpResponseRedirect(reverse('blog:bloglist'))
     return render(request,'App_login/login.html',{'form':form})
 
 @login_required
@@ -48,8 +49,11 @@ def user(request):
     return HttpResponse("User")
 
 @login_required
-def profile(request):
-    return render(request, 'App_Login/profile.html', context={})
+def profile(request,pk):
+
+    profileowner = blog.objects.all()
+    # profileowner = request.user.blog_set.all()
+    return render(request, 'App_Login/profile.html',{'owner':profileowner})
 
 @login_required
 def user_change(request):
